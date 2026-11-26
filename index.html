@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>시의 결 · 한국 시 감정 분석</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="stamp" aria-hidden="true">詩</div>
+    <div>
+      <div class="kicker">감성컴퓨팅 · 한국 근대시 15편</div>
+      <h1>시의 결</h1>
+      <p>시를 한 권 꺼내면 감정 사전과 문학적 해석이 함께 읽은 정서를 보여 줍니다. 감정 비율, 행별 흐름, 시어–정서–주제 다이어그램, 감정 이미지, 비슷한 시 추천까지 한 화면에서 볼 수 있습니다.</p>
+    </div>
+  </header>
+
+  <!-- F-01 시 목록 (책장) -->
+  <div class="shelf-wrap"><div class="shelf" id="shelf" role="group" aria-label="시 목록"></div></div>
+
+  <!-- F-14 가중치 · F-11 직접 입력 -->
+  <div class="controls">
+    <div class="wbox">
+      <label for="wrange"><span>감정 사전 반영 비율</span><b id="wlabel">40%</b></label>
+      <input type="range" id="wrange" min="0" max="100" value="40">
+      <div class="ends"><span>해석 중심</span><span>사전 중심</span></div>
+      <div class="formula">최종 점수 = 해석 기반 프로필 × (1−w) + 감정 사전 점수 × w</div>
+    </div>
+    <button class="btn" id="openCustom" type="button">내 시 분석하기</button>
+  </div>
+
+  <!-- F-02, F-03, F-05 -->
+  <section class="stage">
+    <article class="card sheet" id="sheet"></article>
+    <aside class="card reading" id="reading" aria-live="polite"></aside>
+  </section>
+
+  <div class="cols2">
+    <section class="card"><h2><span class="no">01</span>감정 프로필</h2><p class="sub">8대 정서, 비율(%) · 실선: 선택한 시, 점선: 추천 1위 시</p><div id="radar"></div></section>
+    <section class="card"><h2><span class="no">02</span>행별 감정 흐름</h2><p class="sub">가로축: 행 번호 · 세로축: 그 행에서 감지된 시어 수</p><div class="scroll" id="flow"></div></section>
+  </div>
+
+  <section class="card"><h2><span class="no">03</span>최종 분석 다이어그램</h2><p class="sub">핵심 시어 → 정서 → 주제로 이어지는 구조</p><div class="scroll" id="diagram"></div></section>
+
+  <!-- F-13 감정 이미지 -->
+  <section class="card" id="art">
+    <h2><span class="no">04</span>감정 이미지</h2>
+    <p class="sub">분석한 감정과 시의 소재로 그림을 만듭니다</p>
+    <div class="tabs" role="tablist" aria-label="감정 이미지 종류">
+      <button role="tab" id="tab-ink" aria-selected="true" aria-controls="pane-ink" type="button">감정 수묵화 · 브라우저에서 생성</button>
+      <button role="tab" id="tab-ai" aria-selected="false" aria-controls="pane-ai" type="button">AI 이미지 · 무료</button>
+    </div>
+
+    <div id="pane-ink" role="tabpanel" aria-labelledby="tab-ink" class="artgrid">
+      <div class="canvaswrap"><canvas id="cv" role="img" aria-label="감정 비율로 그린 수묵화"></canvas></div>
+      <div class="artside">
+        <h3>그림의 구성</h3>
+        <div class="chips" id="artChips"></div>
+        <ul class="rules" id="artRules"></ul>
+        <div class="btnrow"><button class="btn" id="redraw" type="button">다시 그리기</button><button class="btn ghost" id="savePng" type="button">PNG로 저장</button></div>
+        <p class="note">계정이나 설치 없이 브라우저가 직접 그립니다. 감정 비율은 색의 양을, 시에 나온 소재(달·별·꽃·길·물 등)는 화면의 사물을 정합니다. '다시 그리기'를 누를 때마다 구도가 바뀝니다.</p>
+      </div>
+    </div>
+
+    <div id="pane-ai" role="tabpanel" aria-labelledby="tab-ai" class="artgrid" hidden>
+      <div class="canvaswrap" id="aiBox"><div class="ph">Gemini 등에서 만든 그림을 '이미지 불러오기'로 가져오면 이 자리에 나타납니다.</div></div>
+      <div class="artside">
+        <h3>외부 AI로 만들기 (무료 Google 계정)</h3>
+        <ol class="steps">
+          <li>'프롬프트 복사 후 Gemini 열기'를 누릅니다.</li>
+          <li>새 탭의 입력창에 붙여넣고(Ctrl+V) 보냅니다.</li>
+          <li>만들어진 그림을 내려받은 뒤 '이미지 불러오기'로 이 자리에 가져와 수묵화 탭과 비교합니다.</li>
+        </ol>
+        <label for="promptBox" class="note">프롬프트 (고쳐 써도 됩니다)</label>
+        <textarea id="promptBox" class="prompt"></textarea>
+        <div class="btnrow">
+          <button class="btn" id="copyOpen" type="button">프롬프트 복사 후 Gemini 열기</button>
+          <button class="btn ghost" id="copyOnly" type="button">프롬프트만 복사</button>
+          <button class="btn ghost" id="loadImg" type="button">이미지 불러오기</button>
+          <button class="btn ghost" id="quickGen" type="button">빠른 생성 (Pollinations · 품질 낮음)</button>
+        </div>
+        <input type="file" id="fileIn" accept="image/*" hidden>
+        <p class="note" id="aiMsg">ChatGPT나 Microsoft Designer 등 다른 AI에 붙여 넣어도 됩니다. 이 앱에는 API 키가 없고, 이미지는 사용자의 브라우저에서만 표시됩니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card"><h2><span class="no">05</span>비슷한 감성의 시</h2><p class="sub">감정 벡터 코사인 유사도 기준 상위 3편</p><div class="rec" id="rec"></div></section>
+
+  <div class="cols2">
+    <section class="card"><h2><span class="no">06</span>감성 지도</h2><p class="sub">감정 벡터를 2차원으로 투영(PCA)</p><div id="map"></div><p class="note" id="mapnote"></p></section>
+    <section class="card"><h2><span class="no">07</span>전체 비교</h2><p class="sub">시 × 정서 비율(%) · 시 이름을 누르면 이동</p><div class="scroll" id="heat"></div></section>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<dialog id="dlg">
+  <h3>내 시 분석하기</h3>
+  <input type="text" id="ctitle" placeholder="제목" aria-label="제목">
+  <textarea id="ctext" placeholder="시 본문을 입력하세요. 행은 줄바꿈으로 나눕니다." aria-label="시 본문"></textarea>
+  <div class="note" id="cmsg">직접 입력한 시는 감정 사전으로만 분석하고, 15편 중 가장 비슷한 시를 추천합니다.</div>
+  <div class="btnrow"><button class="btn" id="cbtn" type="button">분석하기</button><button class="btn ghost" id="cclose" type="button">닫기</button></div>
+</dialog>
+
+<noscript>이 앱은 JavaScript가 필요합니다.</noscript>
+<script src="engine.js"></script>
+<script src="poems.js"></script>
+<script src="charts.js"></script>
+<script src="art.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
